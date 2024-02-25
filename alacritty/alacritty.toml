@@ -1,0 +1,93 @@
+import = [
+    # "~/.config/bspwm/alacritty/themes/catppuccin-latte.toml",
+    # "~/.config/bspwm/alacritty/themes/catppuccin-frappe.toml",
+    # "~/.config/bspwm/alacritty/themes/catppuccin-macchiato.toml",
+    # "~/.config/bspwm/alacritty/themes/catppuccin-mocha.toml",
+    "~/.config/bspwm/alacritty/themes/nord.toml",
+    # "~/.config/bspwm/alacritty/themes/one-dark.toml",
+    "~/.config/bspwm/alacritty/fonts.toml",
+] ## GENERAL --------------------------------------------------------
+
+## Offer IPC using alacritty msg
+ipc_socket = true
+
+## ENVIRONMENT ----------------------------------------------------
+[env]
+# TERM = "alacritty"
+TERM = "alacritty"
+WINIT_X11_SCALE_FACTOR = "1.0"
+
+## WINDOW ---------------------------------------------------------
+[window]
+position = "None"
+dynamic_padding = true
+decorations = "full"
+opacity = 0.75
+blur = false
+startup_mode = "Windowed"
+dynamic_title = true
+class = { instance = "Alacritty", general = "Alacritty" }
+decorations_theme_variant = "None"
+
+## Number of lines/columns (not pixels) in the terminal.
+[window.dimensions]
+columns = 82
+lines = 24
+
+## Blank space added around the window in pixels.
+[window.padding]
+x = 5
+y = 5
+
+## SCROLLING ------------------------------------------------------
+[scrolling]
+history = 10000
+multiplier = 3
+
+## BELL -----------------------------------------------------------
+[bell]
+animation = "Linear"
+duration = 20
+command = { program = "paplay", args = [
+    "/usr/share/sounds/freedesktop/stereo/dialog-error.oga",
+] }
+
+## SELECTION ------------------------------------------------------
+[selection]
+save_to_clipboard = true
+
+## CURSOR ---------------------------------------------------------
+[cursor]
+vi_mode_style = "None"
+blink_interval = 750
+blink_timeout = 5
+unfocused_hollow = false
+thickness = 0.15
+
+[cursor.style]
+shape = "Block"
+blinking = "On"
+
+## MOUSE ----------------------------------------------------------
+[mouse]
+hide_when_typing = false
+
+## HINTS ----------------------------------------------------------
+[[hints.enabled]]
+command = "xdg-open"
+hyperlinks = true
+post_processing = true
+persist = false
+mouse.enabled = true
+binding = { key = "U", mods = "Control|Shift" }
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|file:|git://|ssh:|ftp://)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩‘]+"
+
+## DEBUG ----------------------------------------------------------
+[debug]
+render_timer = false
+persistent_logging = false
+log_level = "Warn"
+renderer = "None"
+print_events = false
+highlight_damage = false
+prefer_egl = false
