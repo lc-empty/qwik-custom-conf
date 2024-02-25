@@ -1,3 +1,6 @@
+### starship configuration
+set -x STARSHIP_CONFIG ~/.config/starship/starship.toml
+
 ### "nvim" as manpager
 set -x MANPAGER "nvim +Man!"
 
