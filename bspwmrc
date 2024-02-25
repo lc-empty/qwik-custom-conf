@@ -100,6 +100,7 @@ bspc rule -r *:*
 
 ## 1
 bspc rule -a Alacritty desktop='^1' follow=on focus=on
+bspc rule -a kitty desktop='^1' follow=on focus=on
 
 ## 2
 declare -a code=(Geany code-oss Code)
