@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-## Copyright (C) 2020-2024 Aditya Shakya <adi1090x@gmail.com>
-##
-## BSPWM config file for Archcraft
-
 ## General ---------------------------------------------------#
 
 ## Bspwm config directory
@@ -36,8 +32,8 @@ BSPWM_SRATIO='0.50'
 ##
 ## Default Setup (Set 8 workspaces on each monitor)
 default_workspaces() {
-	for monitor in `xrandr -q | grep -w 'connected' | cut -d' ' -f1`; do
-		bspc monitor "$monitor" -d '' '' '' '' '' ''
+	for monitor in $(xrandr -q | grep -w 'connected' | cut -d' ' -f1); do
+		bspc monitor "$monitor" -d '' '' '' '' '' ''
 	done
 }
 
@@ -48,11 +44,11 @@ two_monitors_workspaces() {
 	INTERNAL_MONITOR="eDP"
 	EXTERNAL_MONITOR="HDMI-A-0"
 	if [[ $(xrandr -q | grep "${EXTERNAL_MONITOR} connected") ]]; then
-		bspc monitor "$EXTERNAL_MONITOR" -d '' '' ''
-		bspc monitor "$INTERNAL_MONITOR" -d '' '' ''
+		bspc monitor "$EXTERNAL_MONITOR" -d '' '' ''
+		bspc monitor "$INTERNAL_MONITOR" -d '' '' ''
 		bspc wm -O "$EXTERNAL_MONITOR" "$INTERNAL_MONITOR"
 	else
-		bspc monitor "$INTERNAL_MONITOR" -d '' '' '' '' '' ''
+		bspc monitor "$INTERNAL_MONITOR" -d '' '' '' '' '' ''
 	fi
 }
 
@@ -62,8 +58,8 @@ three_monitors_workspaces() {
 	MONITOR_1="eDP"
 	MONITOR_2="HDMI-A-0"
 	MONITOR_3="HDMI-A-1"
-	bspc monitor "$MONITOR_1" -d '' ''
-	bspc monitor "$MONITOR_2" -d '' ''
+	bspc monitor "$MONITOR_1" -d '' ''
+	bspc monitor "$MONITOR_2" -d '' ''
 	bspc monitor "$MONITOR_3" -d '' ''
 	bspc wm -O "$MONITOR_2" "$MONITOR_1" "$MONITOR_3"
 }
@@ -99,40 +95,38 @@ bspc wm --adopt-orphans
 bspc rule -r *:*
 
 ## 1
-bspc rule -a Alacritty desktop='^1' follow=on focus=on
 bspc rule -a kitty desktop='^1' follow=on focus=on
 
 ## 2
-declare -a code=(Geany code-oss Code)
-for i in ${code[@]}; do
-   bspc rule -a $i desktop='^2' follow=on focus=on; done
+bspc rule -a firefox desktop='^2' follow=on focus=on
 
 ## 3
-bspc rule -a firefox desktop='^3' follow=on focus=on
-
+bspc rule -a Insomnia desktop='^3' follow=on focus=on
 
 ## 4
-bspc rule -a Brave-browser desktop='^4' follow=on focus=on
+bspc rule -a discord desktop='^4' follow=on focus=on
 
 ## 5
-bspc rule -a discord desktop='^5' follow=on focus=on
 bspc rule -a Spotify desktop='^5' follow=on focus=on
 declare -a files=(Pcmanfm Thunar qBittorrent)
 for i in ${files[@]}; do
-   bspc rule -a $i desktop='^5' follow=on focus=on; done
+	bspc rule -a $i desktop='^5' follow=on focus=on
+done
 
 ## 6
-declare -a settings=(Lxappearance Lxtask Lxrandr Arandr \
-System-config-printer.py Pavucontrol Exo-helper-1 \
-Xfce4-power-manager-settings)
+declare -a settings=(Lxappearance Lxtask Lxrandr Arandr
+	System-config-printer.py Pavucontrol Exo-helper-1
+	Xfce4-power-manager-settings)
 for i in ${settings[@]}; do
-   bspc rule -a $i desktop='^6' state=floating follow=on focus=on; done
+	bspc rule -a $i desktop='^6' state=floating follow=on focus=on
+done
 
 ## Always Floating Apps
-declare -a floating=(alacritty-float Pcmanfm Onboard Yad 'Firefox:Places' \
-Viewnior feh Nm-connection-editor calamares Calamares)
+declare -a floating=(alacritty-float Pcmanfm Onboard Yad 'Firefox:Places'
+	Viewnior feh Nm-connection-editor calamares Calamares)
 for i in ${floating[@]}; do
-   bspc rule -a $i state=floating follow=on focus=on; done
+	bspc rule -a $i state=floating follow=on focus=on
+done
 
 bspc rule -a Conky state=floating manage=off
 bspc rule -a stalonetray state=floating manage=off
@@ -146,7 +140,7 @@ killall -9 xsettingsd sxhkd dunst ksuperkey xfce4-power-manager bspc
 xsettingsd --config="$BSPDIR"/xsettingsd &
 
 # polkit agent
-if [[ ! `pidof xfce-polkit` ]]; then
+if [[ ! $(pidof xfce-polkit) ]]; then
 	/usr/lib/xfce-polkit/xfce-polkit &
 fi
 
@@ -174,4 +168,3 @@ bspbar
 bspcomp
 bspdunst
 bspfloat &
-
