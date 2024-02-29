@@ -1,0 +1,22 @@
+# run 'bat --list-themes' for a list of all available themes
+--theme="Catppuccin-mocha"
+
+# enable this to use italic text on the terminal
+# this is not supported on all terminal emulators by default
+# --italic-text=always
+
+# uncomment the following line to disable automatic paging
+# --paging=never
+
+# uncomment the following line if you are using less version >= 551 and want to
+# enable mouse scrolling support in 'bat' when running inside tmux
+# this might disable text selection, unless you press shift
+# --pager="less --RAW-CONTROL-CHARS --quit-if-one-screen --mouse"
+
+# syntax mappings: map a certain filename pattern to a language.
+# example 1: use the C++ syntax for .ino files
+# --map-syntax "*.ino:C++"
+# example 2: use ".gitignore"-style highlighting for ".ignore" files
+--map-syntax ".ignore:Git Ignore"
+
+# -- bat cache --build
