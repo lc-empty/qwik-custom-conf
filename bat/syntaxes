@@ -1,0 +1,588 @@
+%YAML 1.2
+---
+name: Command Help
+# don't really exist, but useful for the shortname
+file_extensions:
+  - cmd-help
+  - help
+scope: text.cmd-help
+
+
+variables:
+### section name variables:
+  # words regardless of case, including dashes for compound words
+  any_word: '[A-Za-z][A-Za-z-]*\b'
+  # allow parentheses on both ends of the word
+  any_word2: '\(?{{any_word}}\)?'
+  # words starting with uppercase
+  leading_word: '[A-Z][A-Za-z-]*\b'
+  # only consider lines <= 40 chars long
+  lookahead_lte_40_chars: '(?=.{1,40}\n)'
+
+### command option variables:
+  option_break: '[ \t\n,=\[</:|]'
+  # marks seen in options: . ? : # $ -- +
+  option_char: '[^{{option_break}}]'
+  option_name: '{{option_char}}+'
+
+### command/option argument variables:
+  ellipsis: '\.\.\.'
+  allcaps_argument_name: '[A-Z][0-9A-Z_-]*\b'
+  relaxed_argument_name: '[A-Za-z][0-9A-Za-z_-]*\b'
+
+### other-def variables:
+  other_lowercase_name: '[a-z][0-9a-z_-]*\b'
+  long_space: '   |\t|\n'
+  lookahead_long_space: '(?={{long_space}})'
+  lookahead_single_2_space: '(?=.*  (?!.*\S  \S))'
+  lookahead_no_period_2_space: '(?!.*\.  )'
+
+### pathname variables:
+  path_atom: '[0-9a-zA-Z._-]+'
+  absolute_path: '(/{{path_atom}})+/?'
+  relative_path: '{{path_atom}}{{absolute_path}}'
+  home_relative_path: '~{{absolute_path}}'
+
+### exceptions variables:
+  color_code_begin: '(?=.*\e\[.*'
+  color_code_end: '.*(?<=[0-9])m)'
+
+scope_variables: # last scope is matched first
+  - &SECTION_HEADING_SCOPES
+    constant.section-heading.cmd-help
+    markup.heading.cmd-help
+    string.section-heading.cmd-help
+    meta.constructor.argument.css.section-heading.cmd-help
+  - &INLINE_USAGE_SCOPES
+    constant.section-heading.inline-usage.cmd-help
+    markup.heading.inline-usage.cmd-help
+    string.section-heading.inline-usage.cmd-help
+    meta.constructor.argument.css.section-heading.inline-usage.cmd-help
+
+  - &OPTION_SCOPES
+    entity.name.function.option.cmd-help
+  - &PLUS_OPTION_SCOPES
+    entity.name.function.option.plus.cmd-help
+  - &END_OF_OPTIONS_SCOPE # =~ KEYWORD_SCOPES
+    constant.other.end-of-options.cmd-help
+
+  - &OPTION_ARGUMENT_SCOPES
+    entity.name.function.option.cmd-help
+    keyword.other.argument.cmd-help
+  # argument definitions (99% confidence) =~ OPTION_ARGUMENT
+  - &ARGUMENT_SCOPES
+    keyword.other.argument.cmd-help
+  # mostly all-caps definitions. usually envs or args =~ OPTION_ARGUMENT
+  - &VARIABLE_SCOPES
+    keyword.other.variable.cmd-help
+
+  # non all-caps definitions: subcommands, argument enums, etc.
+  - &KEYWORD_SCOPES
+    constant.other.keyword.cmd-help
+
+  - &PATHNAME_SCOPES
+    constant.character.escape.pathname.cmd-help
+    variable.parameter.pathname.cmd-help
+    meta.function.block.start.handlebars.pathname.cmd-help
+
+
+contexts:
+  prototype:
+    # abort if color escape codes
+    - include: color-escape-codes-sink
+    # abort if formatted with backspaces
+    - match: (?=.*[\b])
+      set: sink
+
+  main: # entry point only, main-b is the real main
+    - meta_include_prototype: false
+    - include: first-line-specials
+    - match: ^
+      set: main-b
+
+  first-line-specials:
+    - include: ignore-syntax-test-header
+    # man page first line: ^cmd/fn_name(man_section_digit) ... idem$
+    - match: (?=^([A-Z-]+)\(([0-9])\)\s.+\s\1\(\2\)$)
+      push:
+        - clear_scopes: true
+        - include: Manpage.sublime-syntax
+
+  main-b: # stack lv 0
+    - match: ^
+      push: [line, line-begin]
+
+  line: # stack lv 1
+    - match: $
+      pop: true
+
+  ### helpers ##################################################################
+
+  else-pop:
+    - include: eol-pop # '.' doesn't match '\n'
+    - match: (?=.)
+      pop: true
+
+  eol-pop:
+    - match: \n
+      pop: true
+
+  then-pop:
+    - match: ''
+      pop: true
+
+  de-scope-option-arg:
+    - clear_scopes: 2
+    - include: then-pop
+
+  sink:
+    - clear_scopes: true
+    - meta_include_prototype: false
+
+  ### stack lv 2 ###############################################################
+
+  line-begin:
+    - match: ^(?=\S)
+      set: indent-0
+    - match: ^ {1,2}(?=\S)
+      set: indent-1-2
+    - match: ^ {3,8}(?=\S)
+      set: indent-3-8
+    - match: ^\t{1,2}(?=\S)
+      set: indent-3-8
+    - include: else-pop
+
+  indent-0:
+    - include: heading
+    - include: option-def-head
+    - include: argument-def
+    - include: other-def
+    - include: else-pop
+
+  indent-1-2:
+    - include: option-def-head
+    - include: heading
+    - include: argument-def
+    - include: other-def
+    - include: else-pop
+
+  indent-3-8:
+    - include: option-def-head
+    - include: argument-def
+    - include: other-def
+    - include: else-pop
+
+  ### section headings #########################################################
+
+  heading:
+    - include: heading-specials
+    - match: '{{lookahead_lte_40_chars}}{{leading_word}}( {{any_word2}})*:?\n'
+      scope: *SECTION_HEADING_SCOPES
+      set: then-pop
+    # - match: '{{any_word2}}( {{any_word2}})*:\n'
+    #   scope: *SECTION_HEADING_SCOPES
+    #   set: then-pop
+
+  heading-specials:
+    - match: (?i:usage):(?=.+\n)
+      scope: *INLINE_USAGE_SCOPES
+      set: maybe-bat
+    - include: python-argparse-headings
+
+
+  # hack to harmonize usage lines in bat's help message
+  #nice: generalize this pattern and remove this hardcoded case
+  maybe-bat:
+    - match: " (bat)"
+      captures:
+        1: *KEYWORD_SCOPES
+      set: then-pop
+    - include: else-pop
+
+  ### option definitions #######################################################
+
+  option-def-head:
+    - include: option-def-specials
+    - match: --- # probably a separator
+      pop: true
+    - include: option-term
+
+  option-term:
+    - include: option-term-optional-bits
+    - match: -{{option_name}}
+      scope: *OPTION_SCOPES
+      set: option-term-post
+
+  option-term-optional-bits:
+    - match: (-{{option_name}})\[({{option_name}}-)\]({{option_name}})
+      captures:
+        1: *OPTION_SCOPES
+        2: *OPTION_SCOPES
+        3: *OPTION_SCOPES
+      set: option-term-post
+
+  option-def-specials:
+    - match: --(?=\s)
+      scope: *END_OF_OPTIONS_SCOPE
+      set: then-pop
+    - match: \+(?=[\s<[:alpha:]])
+      scope: *PLUS_OPTION_SCOPES
+      set: plus-option-post
+    - match: -:(?={{option_break}})
+      scope: *OPTION_SCOPES
+      set: option-term-post
+
+  option-term-post:
+    - include: option-term-connectors
+    - match: '='
+      set: option-term+equals
+    # match '[=' or '[' or ' [' or ':['
+    - match: '\[=|\[| \[|:\['
+      set: option-term+square-bracket
+    - match: ':'
+      set: option-term+colon
+    - match: ','
+      set: option-term+comma
+    - match: '(?=<)'
+      set: option-term+space
+    - match: ' '
+      set: option-term+space
+    - include: else-pop
+
+  option-term-connectors:
+    - match: ', (?=\S)'
+      set: option-def-alt
+    - match: ' \| '
+      set: option-def-alt
+    - match: '\|(?=-)'
+      set: option-def-alt
+    - match: ' / '
+      set: option-def-alt
+    - match: ' (?=-)'
+      set: option-def-alt
+    - match: ' or '
+      set: option-def-alt
+    - match: '  or  '
+      set: option-def-alt
+    - match: '/'
+      set: option-def-alt
+    - match: '\s+(?=-)'
+      set: option-def-alt
+    - match: ', {2,3}(?=\S)'
+      set: option-def-alt
+
+  option-def-alt:
+    - include: option-term
+    - include: else-pop
+
+  ### option arguments #########################################################
+
+  option-term+space:
+    - match: <.*?>
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - match: '{{allcaps_argument_name}}\b'
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - match: '{{relaxed_argument_name}}(?! [:alpha:])'
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - match: '{{relaxed_argument_name}}(?= or )'
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - match: "'{{relaxed_argument_name}}'"
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - match: '{'
+      set: option-argument-curly-bracket
+    - include: else-pop
+
+  option-term+equals:
+    - match: '{{relaxed_argument_name}}'
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - match: <.*?>
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - match: '{'
+      set: option-argument-curly-bracket
+    - include: else-pop
+
+  option-term+square-bracket:
+    - meta_content_scope: *OPTION_ARGUMENT_SCOPES
+    - match: '\|'
+      push: de-scope-option-arg
+    - match: (?=])
+      set:
+        - match: ']'
+          set: option-argument-post
+
+  option-term+colon:
+    - match: <.*?>
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - include: else-pop
+
+  option-term+comma:
+    - match: <.*?>
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: option-argument-post
+    - include: else-pop
+
+  option-argument-curly-bracket:
+    - meta_content_scope: *OPTION_ARGUMENT_SCOPES
+    # match ',' or '|'
+    - match: ',|\|'
+      push: de-scope-option-arg
+    - match: (?=})
+      set:
+        - match: '}'
+          set: option-argument-post
+
+  option-argument-post:
+    - include: option-term-connectors
+    - match: ({{ellipsis}})?
+      scope: *OPTION_ARGUMENT_SCOPES
+    # match '[=' or '['
+    - match: '\[=|\['
+      set: option-term+square-bracket
+    - match: ',\['
+      set: option-term+square-bracket
+    - match: '='
+      set: option-term+equals
+    - match: '\|'
+      set: option-term+space
+    - include: else-pop
+
+  plus-option-post:
+    - match: <.*?>
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "LINE:COLUMN" (from emacs)
+    - match: '{{allcaps_argument_name}}(:{{allcaps_argument_name}})*'
+      scope: *OPTION_ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "+s, --no-sort" (from fzf)
+    - match: '[a-z]+'
+      scope: *PLUS_OPTION_SCOPES
+      set: option-term-post
+    - include: else-pop
+
+  ### other definitions ########################################################
+
+  argument-def:
+    - match: <{{relaxed_argument_name}}>({{ellipsis}})?
+      scope: *ARGUMENT_SCOPES
+      set: then-pop
+    - match: \[{{allcaps_argument_name}}\]({{ellipsis}})?
+      scope: *ARGUMENT_SCOPES
+      set: then-pop
+    - match: '{'
+      set: curly-bracket-argument-def
+    # i.e.: "-" as in stdin
+    - match: -(?=  )
+      scope: *ARGUMENT_SCOPES
+      set: then-pop
+    - match: ({{relaxed_argument_name}}) ({{ellipsis}})
+      captures:
+        1: *ARGUMENT_SCOPES
+        2: *ARGUMENT_SCOPES
+      set: then-pop
+
+  curly-bracket-argument-def:
+    - meta_content_scope: *ARGUMENT_SCOPES
+    # match ',' or '|'
+    - match: ',|\|'
+      push: de-scope-option-arg
+    - match: (?=})
+      set:
+        - match: '}'
+          set: then-pop
+    - include: eol-pop
+
+  other-def:
+    - include: other-def-escapes
+    - include: pathname-def
+    - include: keyword-def
+    - include: variable-def
+
+  other-def-escapes:
+    # pretty common in "usage:" alternatives
+    - match: (?=or\s)
+      set: then-pop
+    - match: (?=or:)
+      set: then-pop
+
+  keyword-def:
+    - match: '{{other_lowercase_name}}{{lookahead_long_space}}'
+      scope: *KEYWORD_SCOPES
+      set: then-pop
+    # e.g.: "install - install packages" (from apt)
+    - match: '{{other_lowercase_name}}(?=\s+-\s+\S)'
+      scope: *KEYWORD_SCOPES
+      set: then-pop
+    # e.g.: "compose*" (from docker)
+    - match: '{{other_lowercase_name}}\*{{lookahead_long_space}}'
+      scope: *KEYWORD_SCOPES
+      set: then-pop
+    # e.g.: "build, b" (from cargo)
+    - match: ({{other_lowercase_name}}), ({{other_lowercase_name}}){{lookahead_long_space}}
+      captures:
+        1: *KEYWORD_SCOPES
+        2: *KEYWORD_SCOPES
+      set: then-pop
+    - include: keyword-seq-def
+
+  variable-def:
+    - match: '{{allcaps_argument_name}}(?=  )'
+      scope: *VARIABLE_SCOPES
+      set: then-pop
+    # e.g.: "PYTHONSTARTUP:", "PYTHONCASEOK :"
+    - match: '{{allcaps_argument_name}}(?=\s*:)'
+      scope: *VARIABLE_SCOPES
+      set: then-pop
+    - match: \${{allcaps_argument_name}}
+      scope: *VARIABLE_SCOPES
+      set: then-pop
+    # e.g.: "'warn'" or "'warn-nopipe'" (from tee)
+    - match: "'{{other_lowercase_name}}'"
+      scope: *VARIABLE_SCOPES
+      set: then-pop
+
+  pathname-def:
+    - match: '{{absolute_path}}{{lookahead_long_space}}'
+      scope: *PATHNAME_SCOPES
+      set: then-pop
+    - match: '{{relative_path}}{{lookahead_long_space}}'
+      scope: *PATHNAME_SCOPES
+      set: then-pop
+    - match: '{{home_relative_path}}{{lookahead_long_space}}'
+      scope: *PATHNAME_SCOPES
+      set: then-pop
+    # dotfile
+    - match: '\.{{path_atom}}{{lookahead_long_space}}'
+      scope: *PATHNAME_SCOPES
+      set: then-pop
+
+  keyword-seq-def:
+    - match: '({{other_lowercase_name}}) (-{{option_name}})'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *OPTION_SCOPES
+      set: then-pop
+    # e.g.: "devices [-l]" (from adb)
+    - match: '({{other_lowercase_name}}) \[(-{{option_name}})\]'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *OPTION_SCOPES
+      set: then-pop
+    # e.g.: "connect HOST[:PORT]   ..." (from adb)
+    - match: '({{other_lowercase_name}}) ({{allcaps_argument_name}})(?= .*{{long_space}})'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "bugreport [PATH]" (from adb)
+    - match: '({{other_lowercase_name}}) \[({{allcaps_argument_name}})\]'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "disconnect [HOST[:PORT]]" (from adb)
+    - match: '({{other_lowercase_name}}) \[({{allcaps_argument_name}})\['
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "pair HOST[:PORT] [PAIRING CODE]" (from adb)
+    - match: '({{other_lowercase_name}}) ({{allcaps_argument_name}})\['
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "shell [-e ESCAPE] [-n] [-Tt] [-x] [COMMAND...]" (from adb)
+    - match: '({{other_lowercase_name}}) \[(-{{option_name}}) ({{allcaps_argument_name}})\]'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *OPTION_SCOPES
+        # 3: *ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "wait-for[-TRANSPORT]-STATE..." (from adb)
+    - match: '({{other_lowercase_name}})\[(-{{allcaps_argument_name}})\]'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "reboot [bootloader|recovery| ..." (from adb)
+    - match: '({{other_lowercase_name}}) \[({{relaxed_argument_name}})\|'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *ARGUMENT_SCOPES
+      set: then-pop
+    # e.g.: "bat <SUBCOMMAND>" (from bat)
+    - match: '({{other_lowercase_name}}) <({{relaxed_argument_name}})>'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *KEYWORD_SCOPES
+      set: then-pop
+    # e.g.: "mount [options] ..." (from mount)
+    - match: '({{other_lowercase_name}}) \[({{other_lowercase_name}})\]'
+      captures:
+        1: *KEYWORD_SCOPES
+        # 2: *OPTION_SCOPES
+      set: then-pop
+    # e.g.: "bs=BYTES" (from dd)
+    - match: '({{other_lowercase_name}})=({{allcaps_argument_name}})(?={{long_space}})'
+      captures:
+        1: *KEYWORD_SCOPES
+        2: *ARGUMENT_SCOPES
+      set: then-pop
+    - include: keyword-def-seq-lax
+
+  # less restrictive matches, catch all
+  keyword-def-seq-lax:
+    - match: '{{other_lowercase_name}}(?= .*{{long_space}})'
+      scope: *KEYWORD_SCOPES
+      set: then-pop
+    - match: '{{other_lowercase_name}}{{lookahead_single_2_space}}{{lookahead_no_period_2_space}}'
+      scope: *KEYWORD_SCOPES
+      set: then-pop
+
+  ### notable exceptions #######################################################
+
+  color-escape-codes-sink:
+    # normal colors fg
+    - match: '{{color_code_begin}}3[0-7]{{color_code_end}}'
+      set: sink
+    # bright colors fg
+    - match: '{{color_code_begin}}9[0-7]{{color_code_end}}'
+      set: sink
+    # normal colors bg
+    - match: '{{color_code_begin}}4[0-7]{{color_code_end}}'
+      set: sink
+    # bright colors bg
+    - match: '{{color_code_begin}}10[0-7]{{color_code_end}}'
+      set: sink
+    # 256 colors fg
+    - match: '{{color_code_begin}}38;5;{{color_code_end}}'
+      set: sink
+    # 256 colors bg
+    - match: '{{color_code_begin}}48;5;{{color_code_end}}'
+      set: sink
+    # RGB colors fg
+    - match: '{{color_code_begin}}38;2;{{color_code_end}}'
+      set: sink
+    # RGB colors bg
+    - match: '{{color_code_begin}}48;2;{{color_code_end}}'
+      set: sink
+
+  ignore-syntax-test-header:
+    - match: '# SYNTAX TEST "cmd-help.sublime-syntax"\n'
+      set: main
+    - match: ^\n$ # empty line
+      set: main
+
+  python-argparse-headings:
+    - match: (positional arguments|optional arguments|required arguments|options):\n
+      scope: *SECTION_HEADING_SCOPES
+      set: then-pop
