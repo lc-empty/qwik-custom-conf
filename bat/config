@@ -1,5 +1,5 @@
 # run 'bat --list-themes' for a list of all available themes
---theme="Catppuccin-mocha"
+--theme="Catppuccin%20Mocha"
 
 # enable this to use italic text on the terminal
 # this is not supported on all terminal emulators by default
