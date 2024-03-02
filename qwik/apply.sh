@@ -2,12 +2,12 @@
 
 ## Theme ------------------------------------
 BDIR="$HOME/.config/bspwm"
-TDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+TDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 THEME="${TDIR##*/}"
 
 source "$BDIR"/themes/"$THEME"/theme.bash
-altbackground="`pastel color $background | pastel lighten $light_value | pastel format hex`"
-altforeground="`pastel color $foreground | pastel darken $dark_value | pastel format hex`"
+altbackground="$(pastel color $background | pastel lighten $light_value | pastel format hex)"
+altforeground="$(pastel color $foreground | pastel darken $dark_value | pastel format hex)"
 
 ## Directories ------------------------------
 PATH_CONF="$HOME/.config"
@@ -19,7 +19,7 @@ PATH_ROFI="$PATH_BSPWM/themes/$THEME/rofi"
 
 ## Wallpaper ---------------------------------
 apply_wallpaper() {
-	feh --bg-fill "$wallpaper"
+	feh --bg-fill ~/.config/bspwm/themes/qwik/mandelbrot_full_lavender.png
 }
 
 ## Polybar -----------------------------------
@@ -31,7 +31,7 @@ apply_polybar() {
 	sed -i -e "s/font-0 = .*/font-0 = \"$polybar_font\"/g" ${PATH_PBAR}/config.ini
 
 	# rewrite colors file
-	cat > ${PATH_PBAR}/colors.ini <<- EOF
+	cat >${PATH_PBAR}/colors.ini <<-EOF
 		[color]
 
 		BACKGROUND = ${background}
@@ -78,7 +78,7 @@ apply_rofi() {
 	sed -i -e "s/font:.*/font: \"$rofi_font\";/g" ${PATH_ROFI}/shared/fonts.rasi
 
 	# rewrite colors file
-	cat > ${PATH_ROFI}/shared/colors.rasi <<- EOF
+	cat >${PATH_ROFI}/shared/colors.rasi <<-EOF
 		* {
 		    background:     ${background};
 		    background-alt: ${altbackground};
@@ -110,7 +110,7 @@ apply_terminal() {
 		-e "s/size = .*/size = $terminal_font_size/g"
 
 	# alacritty : colors
-	cat > ${PATH_TERM}/colors.toml <<- _EOF_
+	cat >${PATH_TERM}/colors.toml <<-_EOF_
 		## Colors configuration
 		[colors.primary]
 		background = "${background}"
@@ -152,7 +152,7 @@ apply_appearance() {
 	GTK3FILE="$PATH_CONF/gtk-3.0/settings.ini"
 
 	# apply gtk theme, icons, cursor & fonts
-	if [[ `pidof xsettingsd` ]]; then
+	if [[ $(pidof xsettingsd) ]]; then
 		sed -i -e "s|Net/ThemeName .*|Net/ThemeName \"$gtk_theme\"|g" ${XFILE}
 		sed -i -e "s|Net/IconThemeName .*|Net/IconThemeName \"$icon_theme\"|g" ${XFILE}
 		sed -i -e "s|Gtk/CursorThemeName .*|Gtk/CursorThemeName \"$cursor_theme\"|g" ${XFILE}
@@ -189,7 +189,7 @@ apply_dunst() {
 
 	# modify colors
 	sed -i '/urgency_low/Q' ${PATH_BSPWM}/dunstrc
-	cat >> ${PATH_BSPWM}/dunstrc <<- _EOF_
+	cat >>${PATH_BSPWM}/dunstrc <<-_EOF_
 		[urgency_low]
 		timeout = 2
 		background = "${background}"
@@ -248,7 +248,7 @@ create_file() {
 	if [[ ! -f "$theme_file" ]]; then
 		touch ${theme_file}
 	fi
-	echo "$THEME" > ${theme_file}
+	echo "$THEME" >${theme_file}
 }
 
 # Notify User -------------------------------
