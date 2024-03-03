@@ -3,6 +3,7 @@ source ~/.config/fish/conf.d/git.fish
 source ~/.config/fish/functions/fn.fish
 
 set -x STARSHIP_CONFIG ~/.config/starship/starship.toml
+set -x TMUX_CONFIG ~/.config/tmux/tmux.conf
 
 set fish_color_normal brcyan
 set fish_color_autosuggestion '#7d7d7d'

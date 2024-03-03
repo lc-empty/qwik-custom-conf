@@ -4,6 +4,7 @@ alias .3 'cd ../../..'
 alias .4 'cd ../../../..'
 alias .5 'cd ../../../../..'
 
+alias :q "exit"
 
 alias cat "bat"
 alias lvim '/home/qwik/.local/bin/lvim'
