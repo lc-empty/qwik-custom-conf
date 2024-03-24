@@ -5,9 +5,9 @@ palette = "catppuccin_mocha"
 
 
 [character]
-success_symbol = "[[♥](blue) ➜](bold sapphire)"
+success_symbol = "[[ ](blue) ➜](bold sapphire)"
 error_symbol = "[[✗](mauve) ➜](bold red)"
-vimcmd_symbol = "[♥](green)"
+vimcmd_symbol = "[ ](green)"
 
 [package]
 disabled = true
