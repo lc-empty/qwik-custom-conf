@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Import Current Theme
+DIR="$HOME/.config/bspwm"
+STYLE="qwik"
+RASI="$DIR/themes/$STYLE/rofi/windows.rasi"
+
+# Run
+rofi \
+    -show window \
+	-theme ${RASI}
