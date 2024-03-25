@@ -33,14 +33,6 @@ polybar_font='JetBrains Mono:size=10;3'
 rofi_font='Iosevka 10'
 rofi_icon='Zafiro'
 
-# Terminal
-terminal_font_name='JetBrainsMono Nerd Font'
-terminal_font_size='10'
-
-# Geany
-geany_colors='arc.conf'
-geany_font='JetBrains Mono 10'
-
 # Appearance
 gtk_font='Noto Sans 9'
 gtk_theme='Arc-Dark'
