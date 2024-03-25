@@ -18,7 +18,7 @@ PATH_ROFI="$PATH_BSPWM/themes/$THEME/rofi"
 
 ## Wallpaper ---------------------------------
 apply_wallpaper() {
-	feh --bg-fill ~/.config/bspwm/themes/mocha/mandelbrot_full_red.png
+	feh --bg-fill ~/.config/bspwm/themes/$THEME/mandelbrot_full_red.png
 }
 
 ## Polybar -----------------------------------
