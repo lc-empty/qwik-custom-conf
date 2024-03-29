@@ -18,7 +18,7 @@ PATH_ROFI="$PATH_BSPWM/themes/$THEME/rofi"
 
 ## Wallpaper ---------------------------------
 apply_wallpaper() {
-	feh --bg-fill ~/.config/bspwm/themes/$THEME/mandelbrot_full_lavender.png
+	feh --bg-fill ~/.config/bspwm/themes/$THEME/catppuccin_wallpaper.png
 }
 
 ## Polybar -----------------------------------
@@ -50,11 +50,11 @@ apply_polybar() {
 		surface0 = #313244
 		surface1 = #45475a
 		surface2 = #585b70
-		
+
 		overlay0 = #6c7086
 		overlay1 = #7f849c
 		overlay2 = #9399b2
-		
+
 		blue = #89b4fa
 		lavender = #b4befe
 		sapphire = #74c7ec
