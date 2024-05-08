@@ -1,4 +1,6 @@
 alias gs "git status -sb"
+alias gaa "git add ."
+alias gcm "git commit -m"
 alias gl "git log --graph --oneline --all"
 alias gd "git diff"
 alias gc "git commit"
@@ -22,4 +24,8 @@ end
 
 function git_diff_commit
     git diff $argv[1]..$argv[2]
+end
+
+function git_diff
+    git diff --stat | sed 's/|.*|/|/g'
 end
