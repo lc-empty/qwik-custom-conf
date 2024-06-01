@@ -4,6 +4,7 @@ source ~/.config/fish/functions/fn.fish
 
 set -x STARSHIP_CONFIG ~/.config/starship/starship.toml
 set -x TMUX_CONFIG ~/.config/tmux/tmux.conf
+set -x BAT_THEME "Catppuccin Mocha"
 
 # -- fzf catppuccin theme
 set -Ux FZF_DEFAULT_OPTS "\

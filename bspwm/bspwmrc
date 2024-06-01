@@ -95,12 +95,13 @@ bspc wm --adopt-orphans
 bspc rule -r *:*
 
 ## 1
-bspc rule -a kitty desktop='^1' follow=on focus=on
+bspc rule -a Alacritty desktop='^1' follow=on focus=on
 
 ## 2
 bspc rule -a firefox desktop='^2' follow=on focus=on
 
 ## 3
+bspc rule -a Code desktop='^3' follow=on focus=on
 bspc rule -a Insomnia desktop='^3' follow=on focus=on
 
 ## 4
