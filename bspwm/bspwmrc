@@ -103,6 +103,7 @@ bspc rule -a firefox desktop='^2' follow=on focus=on
 ## 3
 bspc rule -a Code desktop='^3' follow=on focus=on
 bspc rule -a Insomnia desktop='^3' follow=on focus=on
+bspc rule -a jetbrains-goland desktop='^3' follow=on focus=on
 
 ## 4
 bspc rule -a discord desktop='^4' follow=on focus=on
