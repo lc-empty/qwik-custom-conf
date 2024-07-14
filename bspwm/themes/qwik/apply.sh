@@ -12,7 +12,7 @@ altforeground="$(pastel color $foreground | pastel darken $dark_value | pastel f
 ## Directories ------------------------------
 PATH_CONF="$HOME/.config"
 PATH_BSPWM="$PATH_CONF/bspwm"
-PATH_TERM="$HOME/.config/kitty"
+PATH_TERM="$HOME/.config/alacritty"
 PATH_PBAR="$PATH_BSPWM/themes/$THEME/polybar"
 PATH_ROFI="$PATH_BSPWM/themes/$THEME/rofi"
 
