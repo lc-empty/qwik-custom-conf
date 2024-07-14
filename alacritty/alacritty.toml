@@ -5,13 +5,13 @@ ipc_socket = true
 
 [env]
 TERM = "alacritty"
-WINIT_X11_SCALE_FACTOR = "1.0"
+WINIT_X11_SCALE_FACTOR = "0.9"
 
 [window]
 position = "None"
 dynamic_padding = true
 decorations = "full"
-opacity = 0.75
+opacity = 0.50
 blur = false
 startup_mode = "Windowed"
 dynamic_title = true
